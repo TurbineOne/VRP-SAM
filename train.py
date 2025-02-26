@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     # Arguments parsing
     parser = argparse.ArgumentParser(description='Visual Prompt Encoder Pytorch Implementation')
-    parser.add_argument('--datapath', type=str, default='/root/paddlejob/workspace/env_run/datsets/')
+    parser.add_argument('--datapath', type=str, default='/home/adam/Development/external/Datasets_HSN')
     parser.add_argument('--benchmark', type=str, default='coco', choices=['pascal', 'coco', 'fss'])
     parser.add_argument('--logpath', type=str, default='')
     parser.add_argument('--bsz', type=int, default=2) # batch size = num_gpu * bsz default num_gpu = 4
@@ -133,7 +133,7 @@ if __name__ == '__main__':
         if val_miou > best_val_miou:
             best_val_miou = val_miou
             if utils.is_main_process():
-                Logger.save_model_miou(model, epoch, val_miou)
+                Logger.save_model_miou(model.module, epoch, val_miou)
         if utils.is_main_process():
             Logger.tbd_writer.add_scalars('data/loss', {'trn_loss': trn_loss, 'val_loss': val_loss}, epoch)
             Logger.tbd_writer.add_scalars('data/miou', {'trn_miou': trn_miou, 'val_miou': val_miou}, epoch)

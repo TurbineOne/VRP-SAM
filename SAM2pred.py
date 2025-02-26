@@ -5,10 +5,13 @@ from torch import nn
 import torch.nn.functional as F
 import numpy as np
 
+
 class  SAM_pred(nn.Module):
     def __init__(self, ):
         super().__init__()
-        self.sam_model = sam_model_registry['vit_h']('/root/paddlejob/workspace/env_run/vrp_sam/sam_vit_h_4b8939.pth')
+        
+        # self.sam_model = sam_model_registry['vit_h']('/root/paddlejob/workspace/env_run/vrp_sam/sam_vit_h_4b8939.pth')
+        self.sam_model = sam_model_registry['vit_h']('/home/adam/Development/external/VRP-SAM/sam_vit_h_4b8939.pth')
         self.sam_model.eval()
 
     def forward_img_encoder(self, query_img):
@@ -19,7 +22,7 @@ class  SAM_pred(nn.Module):
         return  query_feats
     
     def get_feat_from_np(self, query_img, query_name, protos):
-        np_feat_path = '/root/paddlejob/workspace/env_run/vrp_sam/feats_np/coco/'
+        np_feat_path = '/home/adam/Development/external/VRP-SAM/feats_np/coco/'
         if not os.path.exists(np_feat_path): os.makedirs(np_feat_path)
         files_name = os.listdir(np_feat_path)
         query_feat_list = []
@@ -27,15 +30,15 @@ class  SAM_pred(nn.Module):
             if '/root' in name:
                 name = os.path.splitext(name.split('/')[-1])[0]
                 
-            if name + '.npy' not in files_name:
-                query_feats_np = self.forward_img_encoder(query_img[idx, :, :, :].unsqueeze(0))
-                query_feat_list.append(query_feats_np)
-                query_feats_np = query_feats_np.detach().cpu().numpy()
-                np.save(np_feat_path + name + '.npy', query_feats_np)
-            else:
-                sub_query_feat = torch.from_numpy(np.load(np_feat_path + name + '.npy')).to(protos.device)
-                query_feat_list.append(sub_query_feat)
-                del sub_query_feat
+            # if name + '.npy' not in files_name:
+            query_feats_np = self.forward_img_encoder(query_img[idx, :, :, :].unsqueeze(0))
+            query_feat_list.append(query_feats_np)
+            query_feats_np = query_feats_np.detach().cpu().numpy()
+            np.save(np_feat_path + name + '.npy', query_feats_np)
+            # else:
+            #     sub_query_feat = torch.from_numpy(np.load(np_feat_path + name + '.npy')).to(protos.device)
+            #     query_feat_list.append(sub_query_feat)
+            #     del sub_query_feat
         query_feats_np = torch.cat(query_feat_list, dim=0)
         return query_feats_np
 
